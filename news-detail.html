@@ -39,14 +39,14 @@
           let parser = new DOMParser();
           let doc = parser.parseFromString(data.contents, "text/html");
 
-          // محددات العنوان والمحتوى
           const titleElement = doc.querySelector(".news-details-title h1");
           let contentElement = doc.querySelector(".article-details-contents");
 
-          // **الخيار الاحتياطي للمحتوى: إذا لم يتم العثور على المحدد الأساسي، ابحث عن بديل**
           if (!contentElement) {
             contentElement = doc.querySelector(".news-text-box");
           }
+          // إذا لم يتم العثور على أي محتوى، قد يكون هناك محدد آخر شائع للصورة الرئيسية
+          // يمكننا إضافته هنا إذا وجدناه من الفحص اليدوي للصفحة
 
           if (titleElement && contentElement) {
             const title = titleElement.textContent.trim();
@@ -59,13 +59,34 @@
             images.forEach(img => {
               let src = img.getAttribute('src');
               let dataSrc = img.getAttribute('data-src');
+              let dataOriginal = img.getAttribute('data-original'); // إضافة جديدة
+              let srcset = img.getAttribute('srcset'); // إضافة جديدة
 
+              // الأولوية لـ data-src أو data-original
               if (dataSrc && dataSrc.startsWith('/')) {
                 img.setAttribute('src', baseUrl + dataSrc);
-                img.removeAttribute('data-src');
-              } else if (src && src.startsWith('/')) {
+                img.removeAttribute('data-src'); 
+              } else if (dataOriginal && dataOriginal.startsWith('/')) { // معالجة data-original
+                img.setAttribute('src', baseUrl + dataOriginal);
+                img.removeAttribute('data-original');
+              } else if (src && src.startsWith('/')) { // ثم src
                 img.setAttribute('src', baseUrl + src);
               }
+              
+              // معالجة srcset إذا كان موجودًا وقد يكون يحتوي على روابط نسبية
+              if (srcset) {
+                const updatedSrcset = srcset.split(',').map(part => {
+                  const url = part.trim().split(' ')[0];
+                  if (url.startsWith('/')) {
+                    return baseUrl + url + part.substring(url.length);
+                  }
+                  return part;
+                }).join(', ');
+                img.setAttribute('srcset', updatedSrcset);
+              }
+
+              // إزالة أي فئات قد تعيق العرض مثل lazyload
+              img.classList.remove('lazyload', 'lazy'); 
             });
             contentHtml = tempDiv.innerHTML;
             
