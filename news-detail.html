@@ -22,15 +22,12 @@
     const proxy = "https://api.allorigins.win/get?url=";
     const detailsContainer = document.getElementById("news-details");
 
-    // 1. الحصول على رابط الخبر من رابط الصفحة (query parameter)
     const params = new URLSearchParams(window.location.search);
     const articleUrl = params.get('link');
 
     if (articleUrl) {
-      // 2. فك تشفير الرابط الذي تم تشفيره في صفحة index.html
       const decodedUrl = decodeURIComponent(articleUrl);
-
-      // 3. جلب محتوى الخبر باستخدام البروكسي
+      
       fetch(proxy + encodeURIComponent(decodedUrl))
         .then(response => {
           if (!response.ok) {
@@ -42,15 +39,19 @@
           let parser = new DOMParser();
           let doc = parser.parseFromString(data.contents, "text/html");
 
-          // 4. استخدام المحددات الصحيحة للعنوان والمحتوى
+          // محددات العنوان والمحتوى
           const titleElement = doc.querySelector(".news-details-title h1");
-          const contentElement = doc.querySelector(".article-details-contents");
+          let contentElement = doc.querySelector(".article-details-contents");
+
+          // **الخيار الاحتياطي للمحتوى: إذا لم يتم العثور على المحدد الأساسي، ابحث عن بديل**
+          if (!contentElement) {
+            contentElement = doc.querySelector(".news-text-box");
+          }
 
           if (titleElement && contentElement) {
             const title = titleElement.textContent.trim();
             let contentHtml = contentElement.innerHTML;
 
-            // 5. معالجة الصور: تحويل الروابط النسبية إلى مطلقة
             const tempDiv = document.createElement('div');
             tempDiv.innerHTML = contentHtml;
             const images = tempDiv.querySelectorAll('img');
@@ -59,10 +60,9 @@
               let src = img.getAttribute('src');
               let dataSrc = img.getAttribute('data-src');
 
-              // التحقق من وجود data-src وsrc التي تبدأ بـ "/"
               if (dataSrc && dataSrc.startsWith('/')) {
                 img.setAttribute('src', baseUrl + dataSrc);
-                img.removeAttribute('data-src'); // إزالة data-src لتجنب التحميل الكسول
+                img.removeAttribute('data-src');
               } else if (src && src.startsWith('/')) {
                 img.setAttribute('src', baseUrl + src);
               }
