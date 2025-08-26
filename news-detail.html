@@ -9,7 +9,7 @@
     .news-container h1 { font-size: 24px; color: #333; text-align: right; }
     .news-container p { line-height: 1.8; color: #555; text-align: justify; }
     .news-container img { max-width: 100%; height: auto; display: block; margin: 15px auto; border-radius: 5px; }
-    .loading-msg { text-align: center; color: #777; }
+    .loading-msg { text-align: center; color: #777; padding: 20px; }
   </style>
 </head>
 <body>
@@ -22,18 +22,27 @@
     const proxy = "https://api.allorigins.win/get?url=";
     const detailsContainer = document.getElementById("news-details");
 
-    // الحصول على رابط الخبر من رابط الصفحة (query parameter)
+    // 1. الحصول على رابط الخبر من رابط الصفحة (query parameter)
     const params = new URLSearchParams(window.location.search);
     const articleUrl = params.get('link');
 
     if (articleUrl) {
-      fetch(proxy + encodeURIComponent(articleUrl))
-        .then(response => response.json())
+      // 2. فك تشفير الرابط الذي تم تشفيره في صفحة index.html
+      const decodedUrl = decodeURIComponent(articleUrl);
+
+      // 3. جلب محتوى الخبر باستخدام البروكسي
+      fetch(proxy + encodeURIComponent(decodedUrl))
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('فشل جلب البيانات من البروكسي');
+          }
+          return response.json();
+        })
         .then(data => {
           let parser = new DOMParser();
           let doc = parser.parseFromString(data.contents, "text/html");
 
-          // المحددات الصحيحة للعنوان والمحتوى
+          // 4. استخدام المحددات الصحيحة للعنوان والمحتوى
           const titleElement = doc.querySelector(".news-details-title h1");
           const contentElement = doc.querySelector(".article-details-contents");
 
@@ -41,7 +50,7 @@
             const title = titleElement.textContent.trim();
             let contentHtml = contentElement.innerHTML;
 
-            // معالجة الصور: تحويل الروابط النسبية إلى مطلقة
+            // 5. معالجة الصور: تحويل الروابط النسبية إلى مطلقة
             const tempDiv = document.createElement('div');
             tempDiv.innerHTML = contentHtml;
             const images = tempDiv.querySelectorAll('img');
@@ -50,22 +59,23 @@
               let src = img.getAttribute('src');
               let dataSrc = img.getAttribute('data-src');
 
+              // التحقق من وجود data-src وsrc التي تبدأ بـ "/"
               if (dataSrc && dataSrc.startsWith('/')) {
                 img.setAttribute('src', baseUrl + dataSrc);
+                img.removeAttribute('data-src'); // إزالة data-src لتجنب التحميل الكسول
               } else if (src && src.startsWith('/')) {
                 img.setAttribute('src', baseUrl + src);
               }
             });
-
             contentHtml = tempDiv.innerHTML;
-
+            
             detailsContainer.innerHTML = `<h1>${title}</h1>${contentHtml}`;
           } else {
-            detailsContainer.innerHTML = `<div class="loading-msg">⚠️ لم يتم العثور على تفاصيل الخبر.</div>`;
+            detailsContainer.innerHTML = `<div class="loading-msg">⚠️ لم يتم العثور على عنوان أو تفاصيل الخبر.</div>`;
           }
         })
         .catch(err => {
-          detailsContainer.innerHTML = `<div class="loading-msg">❌ خطأ في جلب البيانات: ${err}</div>`;
+          detailsContainer.innerHTML = `<div class="loading-msg">❌ خطأ في جلب البيانات: ${err.message}</div>`;
           console.error("Fetch error:", err);
         });
     } else {
