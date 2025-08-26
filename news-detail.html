@@ -9,6 +9,7 @@
     .news-container h1 { font-size: 24px; color: #333; text-align: right; }
     .news-container p { line-height: 1.8; color: #555; text-align: justify; }
     .news-container img { max-width: 100%; height: auto; display: block; margin: 15px auto; border-radius: 5px; }
+    .main-image { width: 100%; height: auto; margin-bottom: 20px; border-radius: 8px; }
     .loading-msg { text-align: center; color: #777; padding: 20px; }
   </style>
 </head>
@@ -27,7 +28,7 @@
 
     if (articleUrl) {
       const decodedUrl = decodeURIComponent(articleUrl);
-      
+
       fetch(proxy + encodeURIComponent(decodedUrl))
         .then(response => {
           if (!response.ok) {
@@ -39,18 +40,28 @@
           let parser = new DOMParser();
           let doc = parser.parseFromString(data.contents, "text/html");
 
+          // محددات العنوان والمحتوى
           const titleElement = doc.querySelector(".news-details-title h1");
           let contentElement = doc.querySelector(".article-details-contents");
 
           if (!contentElement) {
             contentElement = doc.querySelector(".news-text-box");
           }
-          // إذا لم يتم العثور على أي محتوى، قد يكون هناك محدد آخر شائع للصورة الرئيسية
-          // يمكننا إضافته هنا إذا وجدناه من الفحص اليدوي للصفحة
 
           if (titleElement && contentElement) {
             const title = titleElement.textContent.trim();
             let contentHtml = contentElement.innerHTML;
+            
+            // **الكود الجديد للبحث عن الصورة الرئيسية في صفحة الخبر**
+            let mainImageElement = doc.querySelector(".news-details-img img");
+            let mainImageHtml = '';
+            if (mainImageElement) {
+                let src = mainImageElement.getAttribute('src');
+                if (src && src.startsWith('/')) {
+                    src = baseUrl + src;
+                }
+                mainImageHtml = `<img src="${src}" alt="صورة الخبر الرئيسية" class="main-image">`;
+            }
 
             const tempDiv = document.createElement('div');
             tempDiv.innerHTML = contentHtml;
@@ -59,21 +70,19 @@
             images.forEach(img => {
               let src = img.getAttribute('src');
               let dataSrc = img.getAttribute('data-src');
-              let dataOriginal = img.getAttribute('data-original'); // إضافة جديدة
-              let srcset = img.getAttribute('srcset'); // إضافة جديدة
+              let dataOriginal = img.getAttribute('data-original');
+              let srcset = img.getAttribute('srcset');
 
-              // الأولوية لـ data-src أو data-original
               if (dataSrc && dataSrc.startsWith('/')) {
                 img.setAttribute('src', baseUrl + dataSrc);
                 img.removeAttribute('data-src'); 
-              } else if (dataOriginal && dataOriginal.startsWith('/')) { // معالجة data-original
+              } else if (dataOriginal && dataOriginal.startsWith('/')) {
                 img.setAttribute('src', baseUrl + dataOriginal);
                 img.removeAttribute('data-original');
-              } else if (src && src.startsWith('/')) { // ثم src
+              } else if (src && src.startsWith('/')) {
                 img.setAttribute('src', baseUrl + src);
               }
               
-              // معالجة srcset إذا كان موجودًا وقد يكون يحتوي على روابط نسبية
               if (srcset) {
                 const updatedSrcset = srcset.split(',').map(part => {
                   const url = part.trim().split(' ')[0];
@@ -84,13 +93,11 @@
                 }).join(', ');
                 img.setAttribute('srcset', updatedSrcset);
               }
-
-              // إزالة أي فئات قد تعيق العرض مثل lazyload
               img.classList.remove('lazyload', 'lazy'); 
             });
             contentHtml = tempDiv.innerHTML;
             
-            detailsContainer.innerHTML = `<h1>${title}</h1>${contentHtml}`;
+            detailsContainer.innerHTML = `<h1>${title}</h1>${mainImageHtml}${contentHtml}`;
           } else {
             detailsContainer.innerHTML = `<div class="loading-msg">⚠️ لم يتم العثور على عنوان أو تفاصيل الخبر.</div>`;
           }
