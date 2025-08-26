@@ -44,9 +44,12 @@
           const imgSrc = box.querySelector("img")?.getAttribute("data-src") || "";
           const link = anchor ? new URL(anchor.getAttribute("href"), baseUrl).href : "#";
 
+          // تأكد من أن الرابط مطلق
+          const finalImgSrc = imgSrc.startsWith('http') ? imgSrc : baseUrl + imgSrc;
+
           container.innerHTML += `
-          <div class="news-card" onclick="openNews('${encodeURIComponent(link)}')">
-            <img src="${imgSrc.startsWith('http') ? imgSrc : baseUrl+imgSrc}" alt="${title}">
+          <div class="news-card" onclick="openNews('${encodeURIComponent(link)}', '${encodeURIComponent(finalImgSrc)}')">
+            <img src="${finalImgSrc}" alt="${title}">
             <div class="news-info">
               <h3>${title}</h3>
               <span>🗓 ${date}</span>
@@ -63,9 +66,9 @@
           "❌ خطأ أثناء جلب الأخبار: " + err;
       });
 
-    function openNews(url) {
-      // نفتح صفحة تفاصيل مع الرابط كـ query parameter
-      window.location.href = "news-detail.html?link=" + encodeURIComponent(url);
+    // **التغيير هنا: تمرير رابط الصورة أيضاً**
+    function openNews(url, imgSrc) {
+      window.location.href = `news-detail.html?link=${url}&img=${imgSrc}`;
     }
   </script>
 </body>
