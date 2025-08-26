@@ -1,50 +1,121 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <title>تفاصيل الخبر</title>
-  <style>
-    body { font-family: "Tajawal", sans-serif; background:#fafafa; padding:20px; }
-    .news-detail { max-width:800px; margin:auto; background:#fff; padding:20px;
-                   border-radius:10px; box-shadow:0 1px 6px rgba(0,0,0,0.1); }
-    h1 { font-size:22px; margin-bottom:12px; }
-    .meta { color:#666; font-size:14px; margin-bottom:10px; }
-    img { max-width:100%; border-radius:8px; margin-bottom:15px; }
-    p { line-height:1.7; font-size:16px; color:#333; }
-    a.back { display:inline-block; margin-top:15px; color:#0066cc; text-decoration:none; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تفاصيل الخبر</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 900px;
+            margin: 30px auto;
+            background: #fff;
+            padding: 20px 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-radius: 10px;
+        }
+        h1 {
+            color: #222;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            font-size: 1.1em;
+            color: #555;
+            margin-bottom: 20px;
+        }
+        .meta-info {
+            color: #888;
+            font-size: 0.9em;
+            margin-bottom: 20px;
+        }
+        .meta-info span, .meta-info a {
+            margin-right: 15px;
+        }
+        .news-img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .news-content {
+            color: #333;
+            font-size: 1em;
+        }
+        .error-msg {
+            color: red;
+            text-align: center;
+            margin-top: 50px;
+        }
+    </style>
 </head>
 <body>
-  <div id="content">⏳ جاري تحميل الخبر...</div>
+    <div class="container">
+        <div id="news-container">
+            <h1>جارٍ تحميل الخبر...</h1>
+        </div>
+    </div>
 
-  <script>
-    const params = new URLSearchParams(window.location.search);
-    const newsUrl = params.get("link");
-    const proxy = "https://api.allorigins.win/get?url=" + encodeURIComponent(newsUrl);
+    <script>
+        // الحصول على رابط الخبر من الرابط الحالي، مثلاً ?url=...
+        const urlParams = new URLSearchParams(window.location.search);
+        const newsUrl = urlParams.get('url');
 
-    fetch(proxy)
-      .then(res => res.json())
-      .then(data => {
-        const doc = new DOMParser().parseFromString(data.contents, "text/html");
+        const container = document.getElementById('news-container');
 
-        const title = doc.querySelector("h1")?.textContent.trim() || "بدون عنوان";
-        const date = doc.querySelector(".dates-sec span")?.textContent.trim() || "";
-        const imgSrc = doc.querySelector(".details-img img")?.getAttribute("src") || "";
-        const paragraphs = [...doc.querySelectorAll(".description p")].map(p => p.textContent.trim());
+        if(!newsUrl){
+            container.innerHTML = '<p class="error-msg">لم يتم تحديد رابط الخبر.</p>';
+        } else {
+            // استخدم بروكسي لجلب محتوى الخبر
+            const proxy = 'https://api.allorigins.win/get?url=' + encodeURIComponent(newsUrl);
 
-        document.getElementById("content").innerHTML = `
-          <div class="news-detail">
-            <h1>${title}</h1>
-            <div class="meta">🗓 ${date}</div>
-            <img src="${imgSrc}" alt="${title}">
-            ${paragraphs.map(p => `<p>${p}</p>`).join("")}
-            <a href="index.html" class="back">⬅️ رجوع للأخبار</a>
-          </div>
-        `;
-      })
-      .catch(err => {
-        document.getElementById("content").innerHTML = "❌ خطأ أثناء جلب تفاصيل الخبر: " + err;
-      });
-  </script>
+            fetch(proxy)
+                .then(response => response.json())
+                .then(data => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(data.contents, 'text/html');
+
+                    // جلب العنوان
+                    const title = doc.querySelector('.news-details-title h1')?.innerText || 'لا يوجد عنوان';
+
+                    // جلب العنوان الفرعي
+                    const subtitle = doc.querySelector('.news-details-subtitle p')?.innerText || '';
+
+                    // جلب الصورة
+                    const img = doc.querySelector('.details-cover-img-wrapper img')?.getAttribute('data-src') || '';
+
+                    // جلب التاريخ والفئة
+                    const category = doc.querySelector('.title-section-tags a')?.innerText || '';
+                    const date = doc.querySelector('.news-date-sec span')?.innerText || '';
+
+                    // جلب النصوص الرئيسية (يمكن تعديل selector حسب الموقع)
+                    const contentEls = doc.querySelectorAll('.news-details-content p');
+                    let content = '';
+                    contentEls.forEach(p => {
+                        content += `<p>${p.innerText}</p>`;
+                    });
+
+                    container.innerHTML = `
+                        <h1>${title}</h1>
+                        <div class="subtitle">${subtitle}</div>
+                        <div class="meta-info">
+                            <span>التاريخ: ${date}</span>
+                            <span>القسم: ${category}</span>
+                        </div>
+                        ${img ? `<img class="news-img" src="${img}" alt="${title}">` : ''}
+                        <div class="news-content">${content || '<p>لا يوجد محتوى للنص.</p>'}</div>
+                    `;
+                })
+                .catch(err => {
+                    container.innerHTML = '<p class="error-msg">حدث خطأ أثناء جلب تفاصيل الخبر.</p>';
+                    console.error(err);
+                });
+        }
+    </script>
 </body>
 </html>
