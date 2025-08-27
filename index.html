@@ -58,6 +58,9 @@
     .card:hover { transform: translateY(-5px); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); }
     .card-img-top { height: 200px; object-fit: cover; }
     .card-title { font-weight: bold; }
+    .card-text {
+      color: #fff !important; /* هذا هو الجزء المضاف */
+    }
     .loading-spinner {
       display: flex;
       flex-direction: column;
@@ -207,9 +210,7 @@
     <div class="row" id="news-container">
       <div class="col-12 text-center my-5" id="loading-message">
         <div class="loading-spinner">
-          <div class="spinner-border" role="status">
-            <span class="visually-hidden">جاري التحميل...</span>
-          </div>
+          <div class="spinner-border" role="status"></div>
         </div>
       </div>
     </div>
@@ -316,7 +317,7 @@
                 <img src="" class="card-img-top" alt="${item.title}">
                 <div class="card-body">
                     <h5 class="card-title">${item.title}</h5>
-                    <p class="card-text text-muted"><small>${item.date}</small></p>
+                    <p class="card-text"><small>${item.date}</small></p>
                 </div>
             </div>
         `;
@@ -335,9 +336,7 @@
     function loadNews(section) {
         container.innerHTML = `<div class="col-12 text-center my-5" id="loading-message">
             <div class="loading-spinner">
-            <div class="spinner-border" role="status">
-                <span class="visually-hidden">جاري التحميل...</span>
-            </div>
+            <div class="spinner-border" role="status"></div>
             </div>
         </div>`;
 
