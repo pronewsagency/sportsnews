@@ -2,32 +2,135 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>تفاصيل الخبر</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    body { font-family: "Tajawal", sans-serif; background: #f4f4f4; padding: 20px; }
-    .news-container { max-width: 800px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-    .news-container h1 { font-size: 24px; color: #333; text-align: right; }
-    .news-container p { line-height: 1.8; color: #555; text-align: justify; }
-    .news-container img { max-width: 100%; height: auto; display: block; margin: 15px auto; border-radius: 5px; }
-    .main-image { width: 100%; height: auto; margin-bottom: 20px; border-radius: 8px; }
-    .loading-msg { text-align: center; color: #777; padding: 20px; }
+    body {
+      font-family: 'Cairo', sans-serif;
+      background: #1a237e; /* خلفية زرقاء غامقة */
+      color: #333;
+      padding-bottom: 60px; /* مساحة للقائمة السفلية */
+    }
+    .news-container {
+      max-width: 800px;
+      margin: 20px auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .news-container h1 {
+      font-size: 24px;
+      color: #333;
+      text-align: right;
+    }
+    .news-container p {
+      line-height: 1.8;
+      color: #555;
+      text-align: justify;
+    }
+    .news-container img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin: 15px auto;
+      border-radius: 5px; /* زوايا مقوسة للصور الداخلية */
+    }
+    .main-image {
+      width: 100%;
+      height: auto;
+      margin-bottom: 20px;
+      border-radius: 15px; /* زوايا مقوسة أكثر للصورة الرئيسية */
+    }
+    .loading-msg {
+      text-align: center;
+      color: #fff; /* تم تغيير لون النص إلى الأبيض */
+      padding: 20px;
+    }
+    /* تنسيق الشريط السفلي */
+    .footer {
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        background: linear-gradient(to right, #A993F5, #64B5F6);
+        box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        padding: 8px 0;
+        z-index: 1000;
+    }
+    .footer-btn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        color: #fff;
+        text-decoration: none;
+        font-size: 0.8rem;
+        transition: transform 0.2s ease;
+    }
+    .footer-btn:hover {
+        transform: scale(1.1);
+    }
+    .footer-btn img {
+        width: 20px;
+        height: 20px;
+        margin-bottom: 4px;
+    }
+    .footer-btn .fas {
+        font-size: 20px;
+        margin-bottom: 4px;
+    }
   </style>
 </head>
 <body>
+  <div id="loading-message" class="loading-msg">⏳ جاري تحميل تفاصيل الخبر...</div>
+
   <div class="news-container" id="news-details">
-    <div class="loading-msg">⏳ جاري تحميل تفاصيل الخبر...</div>
-  </div>
+    </div>
+
+  <footer class="footer">
+    <a href="go:a" class="footer-btn">
+      <img src="https://example.com/telegram-icon.png" alt="Telegram">
+      <span>تلغرام</span>
+    </a>
+    <a href="go:b" class="footer-btn">
+      <img src="https://example.com/youtube-icon.png" alt="YouTube">
+      <span>يوتيوب</span>
+    </a>
+    <a href="go:c" class="footer-btn">
+      <img src="https://example.com/tv-icon.png" alt="TV">
+      <span>تلفاز</span>
+    </a>
+    <a href="go:d" class="footer-btn">
+      <img src="https://example.com/vod-icon.png" alt="VOD">
+      <span>VOD</span>
+    </a>
+    <a href="javascript:void(0)" class="footer-btn">
+      <i class="fas fa-search"></i>
+      <span>بحث</span>
+    </a>
+  </footer>
 
   <script>
     const baseUrl = "https://www.footballgallery.net";
     const proxy = "https://api.allorigins.win/get?url=";
     const detailsContainer = document.getElementById("news-details");
+    const loadingMessage = document.getElementById("loading-message");
 
     const params = new URLSearchParams(window.location.search);
     const articleUrl = params.get('link');
 
     if (articleUrl) {
       const decodedUrl = decodeURIComponent(articleUrl);
+      
+      loadingMessage.style.display = 'block';
+      detailsContainer.style.display = 'none';
 
       fetch(proxy + encodeURIComponent(decodedUrl))
         .then(response => {
@@ -37,10 +140,12 @@
           return response.json();
         })
         .then(data => {
+          loadingMessage.style.display = 'none';
+          detailsContainer.style.display = 'block';
+
           let parser = new DOMParser();
           let doc = parser.parseFromString(data.contents, "text/html");
 
-          // **الكود الجديد والمهم هنا**
           const ogImageMeta = doc.querySelector("meta[property='og:image']");
           let mainImageHtml = '';
           if (ogImageMeta) {
@@ -98,11 +203,15 @@
           }
         })
         .catch(err => {
-          detailsContainer.innerHTML = `<div class="loading-msg">❌ خطأ في جلب البيانات: ${err.message}</div>`;
+          loadingMessage.style.display = 'none';
+          detailsContainer.style.display = 'none';
+          document.body.innerHTML += `<div class="loading-msg">❌ خطأ في جلب البيانات: ${err.message}</div>`;
           console.error("Fetch error:", err);
         });
     } else {
-      detailsContainer.innerHTML = `<div class="loading-msg">⚠️ لا يوجد رابط خبر محدد لعرضه.</div>`;
+      loadingMessage.style.display = 'none';
+      detailsContainer.style.display = 'none';
+      document.body.innerHTML += `<div class="loading-msg">⚠️ لا يوجد رابط خبر محدد لعرضه.</div>`;
     }
   </script>
 </body>
