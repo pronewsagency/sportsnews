@@ -12,7 +12,7 @@
   <style>
     body {
       font-family: 'Cairo', sans-serif;
-      background: linear-gradient(to bottom, #e3f2fd, #bbdefb);
+      background: linear-gradient(to bottom, #192842, #192842);
       color: #333;
       padding-bottom: 60px;
     }
@@ -24,7 +24,7 @@
       flex-wrap: wrap; 
     }
     .btn-group {
-      background: linear-gradient(to right, #A993F5, #64B5F6);
+      background: linear-gradient(to right,#100f8a 50%, #09034a);
       border-radius: 0.375rem; 
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
       overflow: hidden; 
@@ -46,14 +46,14 @@
       box-shadow: none;
     }
     .btn-group .btn.active {
-      background: rgba(255, 255, 255, 0.3); 
+      background: linear-gradient(to bottom, #103f8a 50%, #09069a); 
     }
     .news-container { max-width: 900px; margin: 20px auto; }
     .card {
       transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
       border: none;
-      background: linear-gradient(to bottom, #A993F5, #64B5F6);
-      color: #333;
+      background: linear-gradient(to bottom, #100f8a 50%, #09034a);
+      color: #fff;
     }
     .card:hover { transform: translateY(-5px); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); }
     .card-img-top { height: 200px; object-fit: cover; }
@@ -78,7 +78,7 @@
     .image-placeholder {
       position: relative;
       height: 200px;
-      background: linear-gradient(to bottom, #A993F5, #64B5F6);
+      background: linear-gradient(to bottom, #100f8a 50%, #09034a);
       display: flex;
       justify-content: center;
       align-items: center;
@@ -119,7 +119,7 @@
         position: fixed;
         bottom: 0;
         width: 100%;
-        background: linear-gradient(to right, #A993F5, #64B5F6);
+        background: linear-gradient(to right, #192842);
         box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
         display: flex;
         justify-content: space-around;
@@ -154,7 +154,7 @@
       display: none;
       position: sticky;
       top: 0;
-      background: #fff; /* الخلفية الخارجية بيضاء */
+      background: #192842; /* الخلفية الخارجية بيضاء */
       padding: 10px;
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
       z-index: 999;
@@ -168,7 +168,7 @@
     .search-bar-container input {
       flex-grow: 1;
       border: 1px solid #fff; /* حدود الحقل بيضاء */
-      background: #4a148c; /* خلفية الحقل نيلي */
+      background: #192842; /* خلفية الحقل نيلي */
       color: #fff; /* لون النص أبيض */
       border-radius: 5px;
       padding: 5px 10px;
@@ -183,7 +183,7 @@
       font-size: 1.5rem;
       margin-right: 10px;
       cursor: pointer;
-      color: #999;
+      color: #fff;
     }
   </style>
 </head>
