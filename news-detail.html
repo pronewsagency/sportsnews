@@ -28,10 +28,11 @@
       color: #fff; /* لون النص داخل الحاوية أبيض */
     }
     .news-container h1 {
-      font-size: 24px;
+      font-size: 12px; /* تم تصغيره بنسبة 50% */
       text-align: right;
     }
     .news-container p {
+      font-size: 8px; /* تم تصغيره بنسبة 50% */
       line-height: 1.8;
       text-align: justify;
     }
@@ -48,23 +49,23 @@
       margin-bottom: 20px;
       border-radius: 15px; /* زوايا مقوسة أكثر للصورة الرئيسية */
     }
-    /* تنسيق السبينر الاحترافي */
+    /* تنسيق السبينر */
     .loading-spinner-container {
       display: flex;
       justify-content: center;
       align-items: center;
       height: 80vh; /* يوسّط السبينر في منتصف الشاشة */
     }
-    .loader {
-      width: 50px;
-      aspect-ratio: 1;
-      border-radius: 50%;
-      border: 8px solid;
-      border-color: #fff #0000;
-      animation: s1 1s infinite;
+    .spinner-border {
+      width: 3rem;
+      height: 3rem;
+      color: #fff !important; /* لون السبينر أبيض */
+      border-right-color: transparent !important;
+      border-top-color: transparent !important;
+      animation: spinner-spin 0.75s linear infinite;
     }
-    @keyframes s1 {
-      to { transform: rotate(.5turn) }
+    @keyframes spinner-spin {
+      to { transform: rotate(360deg); }
     }
     /* تنسيق الشريط السفلي */
     .footer {
@@ -107,11 +108,27 @@
       color: #fff;
       padding: 20px;
     }
+    .retry-button {
+      background: linear-gradient(to right, #6c757d, #adb5bd);
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      margin-top: 20px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+    .retry-button:hover {
+      background: linear-gradient(to right, #adb5bd, #6c757d);
+    }
   </style>
 </head>
 <body>
   <div class="loading-spinner-container" id="loading-spinner-container">
-    <div class="loader"></div>
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">جاري التحميل...</span>
+    </div>
   </div>
 
   <div class="news-container" id="news-details">
@@ -148,6 +165,20 @@
 
     const params = new URLSearchParams(window.location.search);
     const articleUrl = params.get('link');
+
+    function displayErrorAndRetry() {
+        loadingSpinnerContainer.style.display = 'none';
+        detailsContainer.style.display = 'none';
+        const errorContainer = document.createElement('div');
+        errorContainer.className = 'loading-msg';
+        errorContainer.innerHTML = `
+            ❌ الإنترنت ضعيف
+            <div>
+                <button class="retry-button" onclick="window.location.reload()">إعادة المحاولة</button>
+            </div>
+        `;
+        document.body.appendChild(errorContainer);
+    }
 
     if (articleUrl) {
       const decodedUrl = decodeURIComponent(articleUrl);
@@ -226,12 +257,7 @@
           }
         })
         .catch(err => {
-          loadingSpinnerContainer.style.display = 'none';
-          detailsContainer.style.display = 'none';
-          const errorMsg = document.createElement('div');
-          errorMsg.className = 'loading-msg';
-          errorMsg.textContent = `❌ خطأ في جلب البيانات: ${err.message}`;
-          document.body.appendChild(errorMsg);
+          displayErrorAndRetry();
           console.error("Fetch error:", err);
         });
     } else {
