@@ -18,24 +18,22 @@
     .news-container {
       max-width: 800px;
       margin: 20px auto;
-      background: #fff;
+      background: #1A237E; /* خلفية الحاوية زرقاء غامقة */
       padding: 20px;
       border-radius: 8px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
       display: none; /* مخفي في البداية */
     }
-    .news-container h1, .news-container p {
-      color: #000; /* لون النص الأسود داخل الحاوية البيضاء */
+    .news-container h1, .news-container p, .news-container span {
+      color: #fff; /* لون النص داخل الحاوية أبيض */
     }
     .news-container h1 {
       font-size: 24px;
       text-align: right;
-      color: #333; /* عنوان الخبر يبقى بلون داكن */
     }
     .news-container p {
       line-height: 1.8;
       text-align: justify;
-      color: #555; /* نص الخبر يبقى بلون داكن */
     }
     .news-container img {
       max-width: 100%;
@@ -50,23 +48,23 @@
       margin-bottom: 20px;
       border-radius: 15px; /* زوايا مقوسة أكثر للصورة الرئيسية */
     }
-    /* تنسيق السبينر */
+    /* تنسيق السبينر الاحترافي */
     .loading-spinner-container {
       display: flex;
       justify-content: center;
       align-items: center;
       height: 80vh; /* يوسّط السبينر في منتصف الشاشة */
     }
-    .spinner-border {
-      width: 3rem;
-      height: 3rem;
-      color: #fff !important; /* لون السبينر أبيض */
-      border-right-color: transparent !important;
-      border-top-color: transparent !important;
-      animation: spinner-spin 0.75s linear infinite;
+    .loader {
+      width: 50px;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      border: 8px solid;
+      border-color: #fff #0000;
+      animation: s1 1s infinite;
     }
-    @keyframes spinner-spin {
-      to { transform: rotate(360deg); }
+    @keyframes s1 {
+      to { transform: rotate(.5turn) }
     }
     /* تنسيق الشريط السفلي */
     .footer {
@@ -103,13 +101,17 @@
         font-size: 20px;
         margin-bottom: 4px;
     }
+    /* رسائل الخطأ/عدم وجود رابط */
+    .loading-msg {
+      text-align: center;
+      color: #fff;
+      padding: 20px;
+    }
   </style>
 </head>
 <body>
   <div class="loading-spinner-container" id="loading-spinner-container">
-    <div class="spinner-border" role="status">
-      <span class="visually-hidden">Loading...</span>
-    </div>
+    <div class="loader"></div>
   </div>
 
   <div class="news-container" id="news-details">
