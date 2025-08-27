@@ -11,8 +11,8 @@
   <style>
     body {
       font-family: 'Cairo', sans-serif;
-      background: #1a237e; /* خلفية زرقاء غامقة */
-      color: #333;
+      background: #1A237E; /* خلفية زرقاء غامقة */
+      color: #fff; /* لون النص الافتراضي أبيض */
       padding-bottom: 60px; /* مساحة للقائمة السفلية */
     }
     .news-container {
@@ -22,16 +22,20 @@
       padding: 20px;
       border-radius: 8px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      display: none; /* مخفي في البداية */
+    }
+    .news-container h1, .news-container p {
+      color: #000; /* لون النص الأسود داخل الحاوية البيضاء */
     }
     .news-container h1 {
       font-size: 24px;
-      color: #333;
       text-align: right;
+      color: #333; /* عنوان الخبر يبقى بلون داكن */
     }
     .news-container p {
       line-height: 1.8;
-      color: #555;
       text-align: justify;
+      color: #555; /* نص الخبر يبقى بلون داكن */
     }
     .news-container img {
       max-width: 100%;
@@ -46,10 +50,23 @@
       margin-bottom: 20px;
       border-radius: 15px; /* زوايا مقوسة أكثر للصورة الرئيسية */
     }
-    .loading-msg {
-      text-align: center;
-      color: #fff; /* تم تغيير لون النص إلى الأبيض */
-      padding: 20px;
+    /* تنسيق السبينر */
+    .loading-spinner-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 80vh; /* يوسّط السبينر في منتصف الشاشة */
+    }
+    .spinner-border {
+      width: 3rem;
+      height: 3rem;
+      color: #fff !important; /* لون السبينر أبيض */
+      border-right-color: transparent !important;
+      border-top-color: transparent !important;
+      animation: spinner-spin 0.75s linear infinite;
+    }
+    @keyframes spinner-spin {
+      to { transform: rotate(360deg); }
     }
     /* تنسيق الشريط السفلي */
     .footer {
@@ -89,7 +106,11 @@
   </style>
 </head>
 <body>
-  <div id="loading-message" class="loading-msg">⏳ جاري تحميل تفاصيل الخبر...</div>
+  <div class="loading-spinner-container" id="loading-spinner-container">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
 
   <div class="news-container" id="news-details">
     </div>
@@ -121,7 +142,7 @@
     const baseUrl = "https://www.footballgallery.net";
     const proxy = "https://api.allorigins.win/get?url=";
     const detailsContainer = document.getElementById("news-details");
-    const loadingMessage = document.getElementById("loading-message");
+    const loadingSpinnerContainer = document.getElementById("loading-spinner-container");
 
     const params = new URLSearchParams(window.location.search);
     const articleUrl = params.get('link');
@@ -129,7 +150,7 @@
     if (articleUrl) {
       const decodedUrl = decodeURIComponent(articleUrl);
       
-      loadingMessage.style.display = 'block';
+      loadingSpinnerContainer.style.display = 'flex';
       detailsContainer.style.display = 'none';
 
       fetch(proxy + encodeURIComponent(decodedUrl))
@@ -140,7 +161,7 @@
           return response.json();
         })
         .then(data => {
-          loadingMessage.style.display = 'none';
+          loadingSpinnerContainer.style.display = 'none';
           detailsContainer.style.display = 'block';
 
           let parser = new DOMParser();
@@ -203,15 +224,21 @@
           }
         })
         .catch(err => {
-          loadingMessage.style.display = 'none';
+          loadingSpinnerContainer.style.display = 'none';
           detailsContainer.style.display = 'none';
-          document.body.innerHTML += `<div class="loading-msg">❌ خطأ في جلب البيانات: ${err.message}</div>`;
+          const errorMsg = document.createElement('div');
+          errorMsg.className = 'loading-msg';
+          errorMsg.textContent = `❌ خطأ في جلب البيانات: ${err.message}`;
+          document.body.appendChild(errorMsg);
           console.error("Fetch error:", err);
         });
     } else {
-      loadingMessage.style.display = 'none';
+      loadingSpinnerContainer.style.display = 'none';
       detailsContainer.style.display = 'none';
-      document.body.innerHTML += `<div class="loading-msg">⚠️ لا يوجد رابط خبر محدد لعرضه.</div>`;
+      const noLinkMsg = document.createElement('div');
+      noLinkMsg.className = 'loading-msg';
+      noLinkMsg.textContent = `⚠️ لا يوجد رابط خبر محدد لعرضه.`;
+      document.body.appendChild(noLinkMsg);
     }
   </script>
 </body>
